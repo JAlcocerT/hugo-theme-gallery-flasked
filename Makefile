@@ -111,3 +111,32 @@ flask-install: ## Install Flask app requirements into .venv
 .PHONY: flask-run
 flask-run: ## Run Flask content browser at http://localhost:5050
 	uv run flask_app/app.py
+
+# --- Hugo+Flask stack (docker-compose-hugoflask.yml) ---
+.PHONY: hugoflask-build
+hugoflask-build: ## Build the hugo_gallery image used by hugo-server
+	docker build -t hugo_gallery .
+
+.PHONY: hugoflask-up
+hugoflask-up: ## Start Flask UI + Hugo server + static python
+	docker compose -f docker-compose-hugoflask.yml up -d
+
+.PHONY: hugoflask-reup
+hugoflask-reup: ## Recreate the stack (use after Makefile/compose changes)
+	docker compose -f docker-compose-hugoflask.yml up -d --force-recreate
+
+.PHONY: hugoflask-down
+hugoflask-down: ## Stop the Flask+Hugo stack
+	docker compose -f docker-compose-hugoflask.yml down
+
+.PHONY: hugoflask-logs
+hugoflask-logs: ## Tail logs of Flask and Hugo containers
+	docker compose -f docker-compose-hugoflask.yml logs -f
+
+.PHONY: hugoflask-status
+hugoflask-status: ## Show status of Flask+Hugo containers
+	docker ps --filter name=hugo-flaskapp --filter name=hugo_container --filter name=hugo-static-python
+
+.PHONY: hugoflask-deploy
+hugoflask-deploy: ## Trigger a Hugo build via the Flask /deploy endpoint
+	curl -sS -X POST http://localhost:5050/deploy -d next=http://localhost:5050/ | cat >/dev/null || true
