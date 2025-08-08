@@ -10,7 +10,10 @@ services:
       pip install --no-cache-dir flask werkzeug gunicorn && \
       gunicorn -b 0.0.0.0:5050 flask_app.app:app"
     volumes:
-      - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/app"
+      # Original (absolute path example):
+      # - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/app"
+      # Portable (relative to repo root):
+      - "./:/app"
       - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
       - "5050:5050"
@@ -21,13 +24,17 @@ services:
   # Hugo dev server (live reload) using your prebuilt image
   hugo-server:
     image: hugo_gallery
+    build: .
     container_name: hugo_container
     working_dir: /hugo-theme-gallery/exampleSite
     command: hugo server --bind 0.0.0.0 --port 1318 --baseURL http://localhost:1318/
     ports:
       - "1318:1318"
     volumes:
-      - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/hugo-theme-gallery"
+      # Original (absolute path example):
+      # - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/hugo-theme-gallery"
+      # Portable (relative to repo root):
+      - "./:/hugo-theme-gallery"
     restart: "no"
 
   static-python:
@@ -36,7 +43,10 @@ services:
     working_dir: /app
     command: python3 -m http.server 4323 --directory /app/public
     volumes:
-      - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked/exampleSite/public:/app/public:ro"
+      # Original (absolute path example):
+      # - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked/exampleSite/public:/app/public:ro"
+      # Portable (relative to repo root):
+      - "./exampleSite/public:/app/public:ro"
     ports:
       - "8089:4323"
     restart: "no"

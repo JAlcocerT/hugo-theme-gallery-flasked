@@ -32,6 +32,8 @@ Just start the flask web app to see the HUGO folders, upload photos and edit the
 uv run flask_app/app.py
 ```
 
+> Documented the build process at [this **post**](https://jalcocert.github.io/JAlcocerT/cool-hugo-themes/#cool-hugo-themes): 
+
 ---
 
 # Hugo Gallery Theme
