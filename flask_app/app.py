@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import List
 
-from flask import Flask, abort, render_template, send_from_directory, url_for
+from flask import Flask, abort, render_template, send_from_directory, url_for, request, redirect
+from werkzeug.utils import secure_filename
 
 # Resolve paths relative to repo root
 HERE = Path(__file__).resolve()
@@ -18,6 +19,7 @@ app = Flask(
     template_folder=str(REPO_ROOT / "flask_app" / "templates"),
     static_folder=str(REPO_ROOT / "flask_app" / "static"),
 )
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25MB max upload size
 
 
 def is_within_content(path: Path) -> bool:
@@ -71,6 +73,45 @@ def serve_content(filepath: str):
     directory = target.parent
     filename = target.name
     return send_from_directory(directory, filename)
+
+
+@app.route("/folder/<path:subpath>/upload", methods=["POST"])
+def upload_to_folder(subpath: str):
+    """Handle image upload into a specific content subfolder."""
+    target_dir = (CONTENT_DIR / subpath).resolve()
+    if not is_within_content(target_dir) or not target_dir.exists() or not target_dir.is_dir():
+        abort(404)
+
+    if "file" not in request.files:
+        abort(400, description="No file part in the request")
+    file = request.files["file"]
+    if not file or file.filename == "":
+        abort(400, description="No selected file")
+
+    filename = secure_filename(file.filename)
+    if not filename:
+        abort(400, description="Invalid filename")
+
+    ext = Path(filename).suffix.lower()
+    if ext not in ALLOWED_IMAGE_EXTS:
+        abort(400, description=f"Unsupported file type: {ext}")
+
+    save_path = (target_dir / filename)
+    # Avoid overwriting existing files by adding a numeric suffix if needed
+    if save_path.exists():
+        stem = save_path.stem
+        suffix = save_path.suffix
+        i = 1
+        while True:
+            candidate = target_dir / f"{stem}-{i}{suffix}"
+            if not candidate.exists():
+                save_path = candidate
+                break
+            i += 1
+
+    file.save(str(save_path))
+    # Redirect back to the folder view
+    return redirect(url_for("view_folder", subpath=subpath))
 
 
 if __name__ == "__main__":

@@ -17,8 +17,9 @@ hugo mod get
 If you dont have the right version: you can use the `Dockerfile` to build a container with the right version of Hugo and develop locally via `docker-compose-dev.yml`:
 
 ```sh
-make build
-make up
+#hugo server
+make build #This  builds the GO + Setup Proper HUGO version
+make up  #This starts the container and looks to the changes at the exampleSite folder
 ```
 
 When you are done with the changes:

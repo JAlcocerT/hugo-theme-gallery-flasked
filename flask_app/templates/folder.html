@@ -21,6 +21,15 @@
       / {{ current_path }}
     </div>
 
+    <section style="margin: 1rem 0 2rem; padding: 12px; border: 1px solid #eee; border-radius: 6px; background: #fcfcfc;">
+      <form action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
+        <label for="file"><strong>Upload image to this folder:</strong></label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+        <div class="muted" style="font-size: 0.85rem; color:#666; margin-top:4px;">Allowed: .jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff (max 25MB)</div>
+      </form>
+    </section>
+
     <h2>Subfolders</h2>
     <ul>
       {% for rel in subdirs %}
