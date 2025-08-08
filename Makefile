@@ -98,3 +98,16 @@ static-caddy-up: ## Serve public/ with Caddy at http://localhost:8091
 .PHONY: static-caddy-down
 static-caddy-down: ## Stop Caddy static server
 	docker compose -f docker-compose.yml down static-caddy || true
+
+# --- Flask content browser ---
+.PHONY: flask-venv
+flask-venv: ## Create Python virtualenv at .venv
+	uv init
+
+.PHONY: flask-install
+flask-install: ## Install Flask app requirements into .venv
+	uv add flask
+
+.PHONY: flask-run
+flask-run: ## Run Flask content browser at http://localhost:5050
+	uv run flask_app/app.py
