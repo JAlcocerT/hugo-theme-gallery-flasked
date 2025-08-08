@@ -6,6 +6,7 @@ from typing import List
 
 from flask import Flask, abort, render_template, send_from_directory, url_for, request, redirect
 from werkzeug.utils import secure_filename
+import re
 
 # Resolve paths relative to repo root
 HERE = Path(__file__).resolve()
@@ -39,6 +40,40 @@ def list_images(path: Path) -> List[Path]:
     return sorted([p for p in path.iterdir() if p.is_file() and p.suffix.lower() in ALLOWED_IMAGE_EXTS])
 
 
+def read_index_md(folder: Path) -> dict | None:
+    """Read a folder's _index.md and extract simple fields and body.
+    This does a minimal parse of YAML front matter for common scalar keys (title, description).
+    """
+    index_path = folder / "_index.md"
+    if not index_path.exists():
+        return None
+    text = index_path.read_text(encoding="utf-8", errors="replace")
+    title = None
+    description = None
+    body = text
+    if text.lstrip().startswith("---"):
+        # crude split of front matter and body
+        parts = text.lstrip().split("---", 2)
+        # parts: ['', '\nkey: val...\n', '\nbody...']
+        if len(parts) >= 3:
+            fm_text = parts[1]
+            body = parts[2]
+            # extract simple key: value lines
+            for line in fm_text.splitlines():
+                m = re.match(r"^\s*([A-Za-z0-9_]+)\s*:\s*(.*)\s*$", line)
+                if not m:
+                    continue
+                k, v = m.group(1).lower(), m.group(2).strip()
+                # strip quotes
+                if v.startswith(('"', "'")) and v.endswith(('"', "'")) and len(v) >= 2:
+                    v = v[1:-1]
+                if k == "title":
+                    title = v
+                elif k == "description":
+                    description = v
+    return {"title": title, "description": description, "body": body.strip()}
+
+
 @app.route("/")
 def index():
     if not CONTENT_DIR.exists():
@@ -57,11 +92,13 @@ def view_folder(subpath: str):
     # List child directories and images in this folder
     subdirs = [p.relative_to(CONTENT_DIR) for p in list_subdirs(target)]
     images = [p.relative_to(CONTENT_DIR) for p in list_images(target)]
+    index_md = read_index_md(target)
     return render_template(
         "folder.html",
         current_path=(target.relative_to(CONTENT_DIR)),
         subdirs=subdirs,
         images=images,
+        index_md=index_md,
     )
 
 

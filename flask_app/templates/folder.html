@@ -11,6 +11,16 @@
   </div>
 
   <section class="card" style="margin-bottom: 16px;">
+    {% if index_md %}
+      <h2 style="margin-top:0;">{{ index_md.title or 'Folder' }}</h2>
+      {% if index_md.description %}
+        <p class="muted">{{ index_md.description }}</p>
+      {% endif %}
+      {% if index_md.body %}
+        <div class="md" style="margin-top:8px;">{{ index_md.body | e | replace('\n','<br>') | safe }}</div>
+      {% endif %}
+      <hr style="border:0;border-top:1px solid var(--border); margin: 14px 0;">
+    {% endif %}
     <form class="upload" action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
       <label for="file"><strong>Upload image to this folder:</strong></label>
       <input class="input" type="file" id="file" name="file" accept="image/*" required>
