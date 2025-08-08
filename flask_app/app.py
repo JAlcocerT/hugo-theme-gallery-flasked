@@ -8,6 +8,7 @@ from flask import Flask, abort, render_template, send_from_directory, url_for, r
 from werkzeug.utils import secure_filename
 import re
 from datetime import datetime
+import subprocess
 
 # Resolve paths relative to repo root
 HERE = Path(__file__).resolve()
@@ -227,6 +228,75 @@ def serve_content(filepath: str):
     directory = target.parent
     filename = target.name
     return send_from_directory(directory, filename)
+
+
+def _run_hugo_build() -> tuple[bool, str]:
+    """Attempt to build the Hugo site using Docker in multiple ways.
+    Tries, in order:
+      1) docker exec into running container `hugo_container`
+      2) docker compose exec into service `hugo-server` (compose file at repo root)
+      3) one-off docker run using `hugo_gallery` image with a bind mount
+    Returns (ok, message_tail)."""
+    repo = str(REPO_ROOT)
+    example_dir = str(REPO_ROOT / "exampleSite")
+    from shutil import which
+    docker_bin = which("docker")
+    cmds = []
+    if docker_bin:
+        # 1) exec into running container by name
+        cmds.append(f"{docker_bin} exec -w /hugo-theme-gallery/exampleSite hugo_container hugo")
+        # 2) compose exec (no TTY)
+        cmds.append(f"{docker_bin} compose -f '{repo}/docker-compose-hugoflask.yml' exec -T hugo-server hugo")
+        # 3) one-off run using the built image, bind-mount the repo
+        cmds.append(f"{docker_bin} run --rm -v '{repo}':/hugo-theme-gallery -w /hugo-theme-gallery/exampleSite hugo_gallery hugo")
+    last_err = None
+    for c in cmds:
+        try:
+            proc = subprocess.run(["/bin/sh", "-lc", c], capture_output=True, text=True, timeout=300)
+            ok = proc.returncode == 0
+            combined = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+            lines = [ln for ln in combined.splitlines() if ln.strip()]
+            tail = "\n".join(lines[-12:]) if lines else ("OK" if ok else "Error")
+            if len(tail) > 700:
+                tail = tail[-700:]
+            if ok:
+                return True, tail
+            else:
+                last_err = tail
+        except Exception as e:
+            last_err = f"error: {e}"
+    # If all docker-based attempts failed (or docker missing), try local hugo
+    hugo_bin = which("hugo")
+    if hugo_bin:
+        try:
+            proc = subprocess.run([hugo_bin], cwd=example_dir, capture_output=True, text=True, timeout=300)
+            ok = proc.returncode == 0
+            combined = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+            lines = [ln for ln in combined.splitlines() if ln.strip()]
+            tail = "\n".join(lines[-12:]) if lines else ("OK" if ok else "Error")
+            return ok, (tail or ("OK" if ok else "Error"))
+        except Exception as e:
+            last_err = f"local hugo error: {e}"
+    else:
+        if not docker_bin:
+            last_err = (last_err or "") + ("\n" if last_err else "") + "docker not found and no local 'hugo' binary available"
+
+    return False, (last_err or "Unknown error")
+
+
+@app.route("/deploy", methods=["POST"])
+def deploy():
+    # Return user to the current page with build status
+    next_url = request.form.get("next") or request.referrer or url_for("index")
+    ok, msg = _run_hugo_build()
+    from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
+
+    parsed = urlparse(next_url)
+    q = dict(parse_qsl(parsed.query))
+    q.update({"build": "ok" if ok else "err", "msg": msg})
+    new_q = urlencode(q)
+    new_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_q, parsed.fragment))
+    return redirect(new_url)
 
 
 @app.route("/folder/<path:subpath>/upload", methods=["POST"])

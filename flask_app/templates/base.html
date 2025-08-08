@@ -15,11 +15,24 @@
         </div>
         <nav class="nav">
           <a href="{{ url_for('index') }}">Home</a>
+          <form action="{{ url_for('deploy') }}" method="post" style="display:inline; margin-left:10px;">
+            <input type="hidden" name="next" value="{{ request.url }}" />
+            <button class="button" type="submit" title="Run Hugo build in container">Build Hugo</button>
+          </form>
         </nav>
       </div>
     </header>
 
     <main class="container">
+      {% if request.args.get('build') %}
+        {% set ok = request.args.get('build') == 'ok' %}
+        <div class="card status-banner {{ 'status-ok' if ok else 'status-err' }}">
+          <strong>{{ 'Build Succeeded' if ok else 'Build Failed' }}</strong>
+          {% if request.args.get('msg') %}
+            <pre class="status-log">{{ request.args.get('msg') }}</pre>
+          {% endif %}
+        </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
 

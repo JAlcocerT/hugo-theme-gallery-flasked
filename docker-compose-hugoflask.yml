@@ -14,6 +14,18 @@ services:
       - "5050:5050"
     restart: "no"
 
+  # Hugo dev server (live reload) using your prebuilt image
+  hugo-server:
+    image: hugo_gallery
+    container_name: hugo_container
+    working_dir: /hugo-theme-gallery/exampleSite
+    command: hugo server --bind 0.0.0.0 --port 1318 --baseURL http://localhost:1318/
+    ports:
+      - "1318:1318"
+    volumes:
+      - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/hugo-theme-gallery"
+    restart: "no"
+
   static-python:
     image: python:3.12-alpine
     container_name: hugo-static-python

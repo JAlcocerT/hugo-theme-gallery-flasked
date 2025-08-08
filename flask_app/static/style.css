@@ -44,3 +44,9 @@ figcaption{ padding:10px; color: var(--muted); font-size:.9rem }
 .breadcrumb{color: var(--muted); margin: 16px 0}
 form.upload{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
 form.upload input[type=file]{max-width:320px}
+
+/* Build status banner */
+.status-banner{ margin-top:12px; border-left:4px solid var(--border) }
+.status-banner.status-ok{ border-left-color:#2ecc71 }
+.status-banner.status-err{ border-left-color:#e74c3c }
+.status-log{ white-space:pre-wrap; margin:8px 0 0 0 }
