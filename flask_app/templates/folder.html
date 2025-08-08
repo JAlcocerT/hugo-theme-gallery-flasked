@@ -1,58 +1,45 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Folder - {{ current_path }}</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
-      a { text-decoration: none; color: #0059c9; }
-      a:hover { text-decoration: underline; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-      figure { margin: 0; border: 1px solid #eee; border-radius: 6px; overflow: hidden; background: #fafafa; }
-      img { display: block; width: 100%; height: 150px; object-fit: cover; }
-      .breadcrumb { margin-bottom: 1rem; color: #666; }
-      code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
-    </style>
-  </head>
-  <body>
-    <div class="breadcrumb">
-      <a href="{{ url_for('index') }}">/</a>
-      / {{ current_path }}
-    </div>
+{% extends 'base.html' %}
+{% block content %}
+  <div class="breadcrumb">
+    <a href="{{ url_for('index') }}">/</a>
+    / {{ current_path }}
+  </div>
 
-    <section style="margin: 1rem 0 2rem; padding: 12px; border: 1px solid #eee; border-radius: 6px; background: #fcfcfc;">
-      <form action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
-        <label for="file"><strong>Upload image to this folder:</strong></label>
-        <input type="file" id="file" name="file" accept="image/*" required>
-        <button type="submit">Upload</button>
-        <div class="muted" style="font-size: 0.85rem; color:#666; margin-top:4px;">Allowed: .jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff (max 25MB)</div>
-      </form>
-    </section>
+  <section class="card" style="margin-bottom: 16px;">
+    <form class="upload" action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
+      <label for="file"><strong>Upload image to this folder:</strong></label>
+      <input class="input" type="file" id="file" name="file" accept="image/*" required>
+      <button class="button" type="submit">Upload</button>
+      <span class="muted">Allowed: .jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff (max 25MB)</span>
+    </form>
+  </section>
 
-    <h2>Subfolders</h2>
-    <ul>
+  <section class="card" style="margin-bottom: 16px;">
+    <h2 style="margin-top:0;">Subfolders</h2>
+    <ul class="list">
       {% for rel in subdirs %}
         <li><a href="{{ url_for('view_folder', subpath=rel) }}">/{{ rel }}</a></li>
       {% else %}
-        <li><em>No subfolders.</em></li>
+        <li class="muted"><em>No subfolders.</em></li>
       {% endfor %}
     </ul>
+  </section>
 
-    <h2>Images</h2>
+  <section class="card">
+    <h2 style="margin-top:0;">Images</h2>
     <div class="grid">
       {% for rel in images %}
         <figure>
           <a href="{{ url_for('serve_content', filepath=rel) }}" target="_blank" rel="noopener">
             <img src="{{ url_for('serve_content', filepath=rel) }}" alt="{{ rel }}" />
           </a>
-          <figcaption style="padding:8px; font-size: 0.85rem; color:#444;">
+          <figcaption>
             <code>{{ rel }}</code>
           </figcaption>
         </figure>
       {% else %}
-        <p><em>No images in this folder.</em></p>
+        <p class="muted"><em>No images in this folder.</em></p>
       {% endfor %}
     </div>
-  </body>
-</html>
+  </section>
+{% endblock %}

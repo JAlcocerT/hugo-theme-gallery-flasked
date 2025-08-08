@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or 'Content Browser' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="logo">📸</span>
+          <a href="{{ url_for('index') }}">Hugo Content Browser</a>
+        </div>
+        <nav class="nav">
+          <a href="{{ url_for('index') }}">Home</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>Serving from <code>{{ (config.get('CONTENT_DIR') if config.get('CONTENT_DIR') else '') }}</code></small>
+      </div>
+    </footer>
+  </body>
+</html>

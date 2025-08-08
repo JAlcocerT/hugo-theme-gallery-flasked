@@ -20,6 +20,7 @@ app = Flask(
     static_folder=str(REPO_ROOT / "flask_app" / "static"),
 )
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25MB max upload size
+app.config["CONTENT_DIR"] = str(CONTENT_DIR)
 
 
 def is_within_content(path: Path) -> bool:

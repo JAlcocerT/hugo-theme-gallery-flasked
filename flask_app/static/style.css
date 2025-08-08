@@ -1,0 +1,46 @@
+:root{
+  --bg: #0b0f19;
+  --panel: #111827;
+  --muted: #94a3b8;
+  --text: #e5e7eb;
+  --brand: #60a5fa;
+  --accent: #22d3ee;
+  --border: #1f2937;
+}
+*{box-sizing: border-box}
+html,body{height:100%}
+body{
+  margin:0; background: var(--bg); color: var(--text); font: 16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+.container{max-width:1100px; margin:0 auto; padding: 0 20px}
+.site-header{position:sticky; top:0; z-index:10; border-bottom:1px solid var(--border); background: rgba(11,15,25,.7); backdrop-filter: blur(12px)}
+.header-inner{display:flex; align-items:center; justify-content:space-between; padding: 12px 0}
+.brand{display:flex; align-items:center; gap:10px}
+.brand .logo{font-size: 20px}
+.brand a{color: var(--text); font-weight:600; text-decoration:none}
+.nav a{color: var(--muted); text-decoration:none; margin-left: 12px}
+.nav a:hover{color: var(--text)}
+.site-footer{border-top:1px solid var(--border); margin-top:40px; padding: 20px 0; color: var(--muted)}
+
+h1,h2,h3{line-height:1.2; margin: 18px 0}
+code{background:#0b1220; color:#cbd5e1; padding:2px 6px; border-radius:6px}
+
+.card{background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px}
+.muted{color: var(--muted)}
+.button{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background:linear-gradient(135deg, var(--brand), var(--accent)); color:#001226; font-weight:600; text-decoration:none; border:none; cursor:pointer}
+.button:hover{opacity:.95}
+.input{background:#0b1220; border:1px solid var(--border); color: var(--text); padding:8px 10px; border-radius:8px}
+
+.grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:16px }
+figure{ margin:0; overflow:hidden; border-radius:12px; border:1px solid var(--border); background:#0b1220 }
+figure img{ width:100%; height:180px; object-fit:cover; display:block }
+figcaption{ padding:10px; color: var(--muted); font-size:.9rem }
+
+.list{list-style:none; padding:0; margin:0}
+.list li{padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; background: var(--panel)}
+.list a{color: var(--text); text-decoration:none}
+.list a:hover{text-decoration:underline}
+
+.breadcrumb{color: var(--muted); margin: 16px 0}
+form.upload{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+form.upload input[type=file]{max-width:320px}
