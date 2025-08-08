@@ -7,6 +7,7 @@ from typing import List
 from flask import Flask, abort, render_template, send_from_directory, url_for, request, redirect
 from werkzeug.utils import secure_filename
 import re
+from datetime import datetime
 
 # Resolve paths relative to repo root
 HERE = Path(__file__).resolve()
@@ -74,6 +75,29 @@ def read_index_md(folder: Path) -> dict | None:
     return {"title": title, "description": description, "body": body.strip()}
 
 
+def get_index_md_path(folder: Path) -> Path:
+    return folder / "_index.md"
+
+
+def read_raw_index_md(folder: Path) -> str:
+    p = get_index_md_path(folder)
+    if not p.exists():
+        return "---\ntitle: \ndescription: \n---\n\n"  # minimal starter
+    return p.read_text(encoding="utf-8", errors="replace")
+
+
+def write_raw_index_md(folder: Path, content: str) -> None:
+    p = get_index_md_path(folder)
+    # backup existing
+    if p.exists():
+        bak = p.with_suffix(p.suffix + ".bak")
+        try:
+            bak.write_text(p.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+        except Exception:
+            pass
+    p.write_text(content, encoding="utf-8")
+
+
 @app.route("/")
 def index():
     if not CONTENT_DIR.exists():
@@ -99,6 +123,26 @@ def view_folder(subpath: str):
         subdirs=subdirs,
         images=images,
         index_md=index_md,
+    )
+
+
+@app.route("/folder/<path:subpath>/edit", methods=["GET", "POST"])
+def edit_index(subpath: str):
+    target = (CONTENT_DIR / subpath).resolve()
+    if not is_within_content(target) or not target.exists() or not target.is_dir():
+        abort(404)
+    if request.method == "POST":
+        raw = request.form.get("content", "")
+        # rudimentary size check (uses MAX_CONTENT_LENGTH as guidance)
+        if len(raw.encode("utf-8")) > app.config.get("MAX_CONTENT_LENGTH", 25 * 1024 * 1024):
+            abort(400, description="Content too large")
+        write_raw_index_md(target, raw)
+        return redirect(url_for("view_folder", subpath=subpath))
+    raw_md = read_raw_index_md(target)
+    return render_template(
+        "edit_index.html",
+        current_path=(target.relative_to(CONTENT_DIR)),
+        raw_md=raw_md,
     )
 
 

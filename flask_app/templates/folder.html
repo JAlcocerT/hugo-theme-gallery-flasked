@@ -11,14 +11,21 @@
   </div>
 
   <section class="card" style="margin-bottom: 16px;">
-    {% if index_md %}
-      <h2 style="margin-top:0;">{{ index_md.title or 'Folder' }}</h2>
-      {% if index_md.description %}
-        <p class="muted">{{ index_md.description }}</p>
-      {% endif %}
-      {% if index_md.body %}
-        <div class="md" style="margin-top:8px;">{{ index_md.body | e | replace('\n','<br>') | safe }}</div>
-      {% endif %}
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <div>
+        {% if index_md %}
+          <h2 style="margin:0;">{{ index_md.title or 'Folder' }}</h2>
+          {% if index_md.description %}
+            <p class="muted" style="margin:.25rem 0 0 0;">{{ index_md.description }}</p>
+          {% endif %}
+        {% else %}
+          <h2 style="margin:0;">Folder</h2>
+        {% endif %}
+      </div>
+      <a class="button" href="{{ url_for('edit_index', subpath=current_path) }}">Edit _index.md</a>
+    </div>
+    {% if index_md and index_md.body %}
+      <div class="md" style="margin-top:8px;">{{ index_md.body | e | replace('\n','<br>') | safe }}</div>
       <hr style="border:0;border-top:1px solid var(--border); margin: 14px 0;">
     {% endif %}
     <form class="upload" action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
