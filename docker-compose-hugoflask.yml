@@ -6,12 +6,16 @@ services:
     container_name: hugo-flaskapp
     working_dir: /app
     command: >-
-      sh -c "pip install --no-cache-dir flask werkzeug gunicorn &&
+      sh -c "apk add --no-cache docker-cli docker-cli-compose && \
+      pip install --no-cache-dir flask werkzeug gunicorn && \
       gunicorn -b 0.0.0.0:5050 flask_app.app:app"
     volumes:
       - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/app"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
       - "5050:5050"
+    depends_on:
+      - hugo-server
     restart: "no"
 
   # Hugo dev server (live reload) using your prebuilt image
