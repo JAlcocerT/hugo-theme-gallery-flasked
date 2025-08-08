@@ -1,0 +1,20 @@
+#https://github.com/JAlcocerT/Docker/tree/main/Web/SSGs/Hugo
+
+## MAKE SURE YOU RUN THE SITE BUILD COMMAND FIRST, BEFORE DEPLOYING THIS CONTAINER ##
+## YOU NEED TO MOUNT THE SITE DURING THE HUGO DEPLOYMENT ##
+
+#version: '3.8'
+services:
+  server:
+    image: hugo_gallery
+    container_name: hugo
+    working_dir: /hugo-theme-gallery/exampleSite
+    # Run Hugo server explicitly
+    command: hugo server --bind 0.0.0.0 --port 1319 --baseURL http://localhost:1319/
+    ports:
+      - "1319:1319"
+    volumes:
+      - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/hugo-theme-gallery" # Mount whole repo so go.mod replace ../ works
+
+
+#docker compose -f docker-compose-dev.yml up -d
