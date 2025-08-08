@@ -18,10 +18,18 @@ git branch -a
 git checkout -b flask-hugo-gallery
 ```
 
+Start the virtual environment and install flask
+
 ```sh
 uv init
 uv add flask
 uv sync
+```
+
+Just start the flask web app to see the HUGO folders, upload photos and edit the `_index.md`:
+
+```sh
+uv run flask_app/app.py
 ```
 
 ---

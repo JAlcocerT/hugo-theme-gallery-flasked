@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section class="card" style="margin-top:18px;">
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">/</a>
+      {% set parts = (current_path|string).split('/') %}
+      {% set ns = namespace(acc="") %}
+      {% for seg in parts %}
+        {% set ns.acc = ns.acc ~ ('' if ns.acc == '' else '/') ~ seg %}
+        / <a href="{{ url_for('view_folder', subpath=ns.acc) }}">{{ seg }}</a>
+      {% endfor %}
+      / <span class="muted">edit index.md</span>
+    </div>
+
+    <h1 style="margin-top:0;">Edit index.md</h1>
+
+    <form method="post">
+      <textarea id="md" name="content">{{ raw_md }}</textarea>
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button class="button" type="submit">Save</button>
+        <a class="button" href="{{ url_for('view_folder', subpath=current_path) }}" style="background:transparent;border:1px solid var(--border);color:var(--text);">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+  <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+  <script>
+    const easyMDE = new EasyMDE({
+      element: document.getElementById('md'),
+      autofocus: true,
+      autosave: { enabled: false },
+      spellChecker: false,
+      minHeight: '380px',
+      status: ["lines", "words"],
+      toolbar: [
+        "bold", "italic", "heading", "|",
+        "quote", "unordered-list", "ordered-list", "|",
+        "link", "image", "table", "|",
+        "preview", "side-by-side", "fullscreen", "|",
+        "guide"
+      ]
+    });
+  </script>
+{% endblock %}

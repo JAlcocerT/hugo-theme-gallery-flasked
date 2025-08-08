@@ -1,5 +1,5 @@
 ---
-description: This is the "Animals" album. It has two sub-albums.
+description: This is the "Animaaaals" album. It has two sub-albums.
 keywords: [Animals, Photos, Cats, Dogs]
 title: Animals
 weight: 1

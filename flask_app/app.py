@@ -97,6 +97,57 @@ def write_raw_index_md(folder: Path, content: str) -> None:
             pass
     p.write_text(content, encoding="utf-8")
 
+# --- Leaf bundle index.md helpers ---
+def get_leaf_md_path(folder: Path) -> Path:
+    return folder / "index.md"
+
+
+def read_leaf_md(folder: Path) -> dict | None:
+    """Parse folder's index.md (leaf bundle) similarly to _index.md."""
+    p = get_leaf_md_path(folder)
+    if not p.exists():
+        return None
+    text = p.read_text(encoding="utf-8", errors="replace")
+    # reuse the same crude parser
+    title = None
+    description = None
+    body = text
+    if text.lstrip().startswith("---"):
+        parts = text.lstrip().split("---", 2)
+        if len(parts) >= 3:
+            fm_text = parts[1]
+            body = parts[2]
+            for line in fm_text.splitlines():
+                m = re.match(r"^\s*([A-Za-z0-9_]+)\s*:\s*(.*)\s*$", line)
+                if not m:
+                    continue
+                k, v = m.group(1).lower(), m.group(2).strip()
+                if v.startswith(('"', "'")) and v.endswith(('"', "'")) and len(v) >= 2:
+                    v = v[1:-1]
+                if k == "title":
+                    title = v
+                elif k == "description":
+                    description = v
+    return {"title": title, "description": description, "body": body.strip()}
+
+
+def read_raw_leaf_md(folder: Path) -> str:
+    p = get_leaf_md_path(folder)
+    if not p.exists():
+        return "---\ntitle: \ndescription: \n---\n\n"  # starter
+    return p.read_text(encoding="utf-8", errors="replace")
+
+
+def write_raw_leaf_md(folder: Path, content: str) -> None:
+    p = get_leaf_md_path(folder)
+    if p.exists():
+        bak = p.with_suffix(p.suffix + ".bak")
+        try:
+            bak.write_text(p.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+        except Exception:
+            pass
+    p.write_text(content, encoding="utf-8")
+
 
 @app.route("/")
 def index():
@@ -117,12 +168,14 @@ def view_folder(subpath: str):
     subdirs = [p.relative_to(CONTENT_DIR) for p in list_subdirs(target)]
     images = [p.relative_to(CONTENT_DIR) for p in list_images(target)]
     index_md = read_index_md(target)
+    leaf_md = read_leaf_md(target)
     return render_template(
         "folder.html",
         current_path=(target.relative_to(CONTENT_DIR)),
         subdirs=subdirs,
         images=images,
         index_md=index_md,
+        leaf_md=leaf_md,
     )
 
 
@@ -141,6 +194,25 @@ def edit_index(subpath: str):
     raw_md = read_raw_index_md(target)
     return render_template(
         "edit_index.html",
+        current_path=(target.relative_to(CONTENT_DIR)),
+        raw_md=raw_md,
+    )
+
+
+@app.route("/folder/<path:subpath>/edit-index", methods=["GET", "POST"])
+def edit_leaf(subpath: str):
+    target = (CONTENT_DIR / subpath).resolve()
+    if not is_within_content(target) or not target.exists() or not target.is_dir():
+        abort(404)
+    if request.method == "POST":
+        raw = request.form.get("content", "")
+        if len(raw.encode("utf-8")) > app.config.get("MAX_CONTENT_LENGTH", 25 * 1024 * 1024):
+            abort(400, description="Content too large")
+        write_raw_leaf_md(target, raw)
+        return redirect(url_for("view_folder", subpath=subpath))
+    raw_md = read_raw_leaf_md(target)
+    return render_template(
+        "edit_leaf.html",
         current_path=(target.relative_to(CONTENT_DIR)),
         raw_md=raw_md,
     )

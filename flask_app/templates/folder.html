@@ -22,10 +22,26 @@
           <h2 style="margin:0;">Folder</h2>
         {% endif %}
       </div>
-      <a class="button" href="{{ url_for('edit_index', subpath=current_path) }}">Edit _index.md</a>
+      <div style="display:flex; gap:8px;">
+        <a class="button" href="{{ url_for('edit_index', subpath=current_path) }}">Edit _index.md</a>
+        <a class="button" href="{{ url_for('edit_leaf', subpath=current_path) }}">Edit index.md</a>
+      </div>
     </div>
-    {% if index_md and index_md.body %}
+    {% set has_list = index_md and index_md.body %}
+    {% set has_leaf = leaf_md and leaf_md.body %}
+
+    {% if has_list %}
+      {# Show only _index.md when present #}
       <div class="md" style="margin-top:8px;">{{ index_md.body | e | replace('\n','<br>') | safe }}</div>
+      <hr style="border:0;border-top:1px solid var(--border); margin: 14px 0;">
+    {% elif has_leaf %}
+      {# Show only index.md when present (and _index.md absent) #}
+      <h3 style="margin:0 0 6px 0;">index.md</h3>
+      <div class="md" style="margin-top:6px;">{{ leaf_md.body | e | replace('\n','<br>') | safe }}</div>
+      <hr style="border:0;border-top:1px solid var(--border); margin: 14px 0;">
+    {% else %}
+      {# Neither exists: show both placeholders (empty state kept minimal) #}
+      <div class="muted">No _index.md or index.md content yet. Use the edit buttons to create them.</div>
       <hr style="border:0;border-top:1px solid var(--border); margin: 14px 0;">
     {% endif %}
     <form class="upload" action="{{ url_for('upload_to_folder', subpath=current_path) }}" method="post" enctype="multipart/form-data">
