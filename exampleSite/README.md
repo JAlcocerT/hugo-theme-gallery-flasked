@@ -30,4 +30,9 @@ docker exec -it -w /hugo-theme-gallery/exampleSite hugo hugo
 
 Then, the `public` folder will be available at `./hugo-theme-gallery/exampleSite/public`
 
-And 
+You can serve the static files with a web server of your choice, or use the `docker-compose-prod.yml` to serve the static files with Node http-server
+
+```sh
+make prod-build
+make prod-up
+```

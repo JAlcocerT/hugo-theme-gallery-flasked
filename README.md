@@ -1,8 +1,12 @@
+This is a **fork** of the [Hugo Gallery Theme](https://github.com/nicokaiser/hugo-theme-gallery) with a *few changes*:
+
+- Added a Makefile with a few alternatives to spin up static server for built files
 
 ```sh
 hugo version
 make help #there are few alternatives to spin up static server for built files
 
+#See the exampleSite/README.md for more details
 make prod-build #builds the static files
 make prod-up #starts the static server (node via `docker-compose-prod.yml`)
 ```
