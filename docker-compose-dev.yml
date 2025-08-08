@@ -6,13 +6,13 @@
 #version: '3.8'
 services:
   server:
-    image: hugo_gallery
-    container_name: hugo
+    image: hugo_gallery #using the built image starting from Go as per Dockerfile
+    container_name: hugo_container
     working_dir: /hugo-theme-gallery/exampleSite
     # Run Hugo server explicitly
-    command: hugo server --bind 0.0.0.0 --port 1319 --baseURL http://localhost:1319/
+    command: hugo server --bind 0.0.0.0 --port 1318 --baseURL http://localhost:1318/
     ports:
-      - "1319:1319"
+      - "1318:1318"
     volumes:
       - "/home/jalcocert/Desktop/IT/hugo-theme-gallery-flasked:/hugo-theme-gallery" # Mount whole repo so go.mod replace ../ works
 
