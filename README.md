@@ -1,6 +1,10 @@
 
 ```sh
 hugo version
+make help #there are few alternatives to spin up static server for built files
+
+make prod-build #builds the static files
+make prod-up #starts the static server (node via `docker-compose-prod.yml`)
 ```
 
 ---

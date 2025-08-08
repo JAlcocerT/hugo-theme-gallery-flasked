@@ -30,5 +30,4 @@ services:
       - NODE_ENV=production
     restart: "no"
 
-
 #docker compose -f docker-compose-dev.yml up -d
