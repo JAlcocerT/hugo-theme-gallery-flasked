@@ -2,7 +2,12 @@
 {% block content %}
   <div class="breadcrumb">
     <a href="{{ url_for('index') }}">/</a>
-    / {{ current_path }}
+    {% set parts = (current_path|string).split('/') %}
+    {% set ns = namespace(acc="") %}
+    {% for seg in parts %}
+      {% set ns.acc = ns.acc ~ ('' if ns.acc == '' else '/') ~ seg %}
+      / <a href="{{ url_for('view_folder', subpath=ns.acc) }}">{{ seg }}</a>
+    {% endfor %}
   </div>
 
   <section class="card" style="margin-bottom: 16px;">
