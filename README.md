@@ -13,10 +13,15 @@ make prod-up #starts the static server (node via `docker-compose-prod.yml`)
 
 - Created a FlaskWebApp to upload new images to your site
 
-
 ```sh
 git branch -a
 git checkout -b flask-hugo-gallery
+```
+
+```sh
+uv init
+uv add flask
+uv sync
 ```
 
 ---
